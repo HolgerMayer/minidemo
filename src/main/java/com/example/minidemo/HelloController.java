@@ -33,7 +33,7 @@ public class HelloController {
         return "listall";
     }
     
-    @GetMapping("/signup")
+    @GetMapping("signup")
     public String showSignUpForm(NamedCategory category) {
         return "add-namedcategory";
     }
