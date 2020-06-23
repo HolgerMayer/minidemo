@@ -29,8 +29,8 @@
 			<tbody>
 				<tr th:each="category : ${namedCategories}">
 					<td th:text="${category.name}"></td>
-					<td> <a th:href="@{/edit/{id}(id=${category.id})}" class="btn btn-primary">Update</a>
-					    <a th:href="@{/delete/{id}(id=${category.id})}" class="btn btn-danger">Delete</a>
+					<td> <a th:href="@{../edit/{id}(id=${category.id})}" class="btn btn-primary">Update</a>
+					    <a th:href="@{../delete/{id}(id=${category.id})}" class="btn btn-danger">Delete</a>
 					</td>
 				</tr>
 			</tbody>
