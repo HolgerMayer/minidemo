@@ -2,6 +2,7 @@ package com.example.minidemo;
 
 
 import javax.validation.Valid;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,19 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.validation.BindingResult;
+import org.springframework.data.domain.Page;
 
 @Controller
 public class HelloController {
 
 	private static final Logger log = LoggerFactory.getLogger(HelloController.class);
 
-	
-	 private final NamedCategoryRepository namedCategoryRepository;
-	
 	@Autowired
-	public HelloController(NamedCategoryRepository namedCategoryRepository) {
-	    this.namedCategoryRepository = namedCategoryRepository;
-	}
+	private NamedCategoryService categoryService;
+	
 	 
     @GetMapping("/hello")
 	public String hello(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
@@ -35,8 +33,31 @@ public class HelloController {
     
     @GetMapping("/list")
     public String showUpdateForm(Model model) {
-        model.addAttribute("namecategories", namedCategoryRepository.findAll());
+        model.addAttribute("namecategories", categoryService.getAllNamedCategories());
         return "listall";
+    }
+    
+    @GetMapping("/page/{pageNo}")
+	public String findPaginated(@PathVariable (value = "pageNo") int pageNo, 
+			@RequestParam("sortField") String sortField,
+			@RequestParam("sortDir") String sortDir,
+			Model model) {
+        int pageSize = 5;
+
+        Page < NamedCategory > page = categoryService.findPaginated(pageNo, pageSize, sortField, sortDir);
+        List < NamedCategory > listCategories = page.getContent();
+
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("totalPages", page.getTotalPages());
+        model.addAttribute("totalItems", page.getTotalElements());
+        model.addAttribute("listCategories", listCategories);
+        
+		model.addAttribute("sortField", sortField);
+		model.addAttribute("sortDir", sortDir);
+		model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+
+		model.addAttribute("namedCategories", listCategories);
+        return "listPaged";
     }
     
     @GetMapping("signup")
@@ -50,22 +71,21 @@ public class HelloController {
             return "add-namedcategory";
         }
 
-        namedCategoryRepository.save(category);
+        categoryService.saveNamedCategory(category);
         return "redirect:list";
     }
     
 
     @GetMapping("delete/{id}")
     public String deletenamedCategory(@PathVariable("id") long id, Model model) {
-        NamedCategory category = namedCategoryRepository.findById(id);
-        namedCategoryRepository.delete(category);
-        model.addAttribute("namecategories", namedCategoryRepository.findAll());
+        categoryService.deleteNamedCategoryById(id);
+        model.addAttribute("namecategories", categoryService.getAllNamedCategories());
         return "listall";
     }
     
     @GetMapping("edit/{id}")
     public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        NamedCategory category = namedCategoryRepository.findById(id);
+        NamedCategory category = categoryService.getNamedCategoryById(id);
         
         model.addAttribute("namedcategory", category);
         return "update-namedcategory";
@@ -81,8 +101,8 @@ public class HelloController {
 
         category.setId(id);
          
-        namedCategoryRepository.save(category);
-        model.addAttribute("namecategories", namedCategoryRepository.findAll());
+        categoryService.saveNamedCategory(category);
+        model.addAttribute("namecategories", categoryService.getAllNamedCategories());
         return "listall";
     }
 

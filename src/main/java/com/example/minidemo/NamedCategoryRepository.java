@@ -1,12 +1,9 @@
 package com.example.minidemo;
 
-import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NamedCategoryRepository extends CrudRepository<NamedCategory, Long> {
+public interface NamedCategoryRepository extends JpaRepository<NamedCategory, Long> {
 
-	  List<NamedCategory> findByName(String name);
 
-	  NamedCategory findById(long id);
 }
